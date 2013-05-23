@@ -16,6 +16,9 @@ App.Controllers = require('./controllers')
 
 App.config      = require('./config.json')
 
+App.socket = (handler) ->
+  if handler then App._socket = handler else App._socket
+
 App.set(name, value) for name, value of App.config
 
 Q(App)

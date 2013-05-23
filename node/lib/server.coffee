@@ -16,7 +16,7 @@ module.exports = (App) ->
     App.use(App.express.bodyParser())
     App.use(App.express.methodOverride())
     App.use(App.router)
-    App.use(App.express.static(path.normalize(__dirname + '/public')))
+    App.use(App.express.static(path.normalize(__dirname + '/../public')))
 
   Q(http.createServer App).then (server) ->
     App.roots.watch(server)
@@ -26,7 +26,6 @@ module.exports = (App) ->
       listener.configure ->
         listener.set('log level', 1)
         listener.set('transports',[
-          'flashsocket'
           'websocket'
           'xhr-polling'
           'jsonp-polling'
@@ -34,5 +33,5 @@ module.exports = (App) ->
         listener.enable('browser client minification')
         listener.enable('browser client etag')
         listener.enable('browser client cache')
-      # listener.sockets.on('connection', App.Routers.Socket.route)
+      listener.sockets.on('connection', App.socket()) if App.socket()
       App
