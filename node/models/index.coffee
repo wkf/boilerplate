@@ -1,6 +1,9 @@
-module.exports = (App) ->
+module.exports = (app) ->
   console.log 'Initializing Models...'
 
-  module.exports.Socket = require('./socket_model.coffee')
+  app.Model  = class Model
+    constructor: ->
 
-  App
+  app.Models.Socket = require('./socket_model.coffee')(app)
+
+  app

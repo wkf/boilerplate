@@ -1,7 +1,11 @@
-module.exports = (App) ->
+module.exports = (app) ->
   console.log 'Initializing Controllers...'
 
-  module.exports.Home = require('./home_controller.coffee')
-  module.exports.Socket = require('./socket_controller.coffee')
+  app.Controller = class Controller
+    constructor: ->
 
-  App
+  app.Controllers.Home = require('./home_controller.coffee')(app)
+  app.Controllers.Socket = require('./socket_controller.coffee')(app)
+  app.Controllers.Auth = require('./auth_controller.coffee')(app)
+
+  app

@@ -1,6 +1,4 @@
-module.exports = class
-  constructor: (App) ->
-    @App = App
-
-  connect: (client) ->
-    new @App.Models.Socket(client)
+module.exports = (app) ->
+  class SocketController extends app.Controller
+    connect: (client) ->
+      new app.Models.Socket(client)

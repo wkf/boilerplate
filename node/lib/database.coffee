@@ -1,11 +1,12 @@
-module.exports = (App) ->
-  Q        = require('q')
-  mongoose = require('mongoose-q')(require('mongoose'), prefix: '_')
+module.exports = class Database
+  constructor: (app) ->
+    @app      = app
+    @database = app.config.database
 
-  console.log 'Initializing Database...'
+  initialize: (app) ->
+    Q        = require('q')
+    mongoose = require('mongoose-q')(require('mongoose'), prefix: '_')
 
-  mongoose.connect App.get('database');
+    mongoose.connect @database
 
-  Q.ninvoke(mongoose.connection, 'once', 'open').then ->
-    module.exports = mongoose
-    App
+    Q.ninvoke(mongoose.connection, 'once', 'open').then => @app

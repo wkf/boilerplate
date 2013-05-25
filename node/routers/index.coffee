@@ -1,11 +1,13 @@
-module.exports = (App) ->
+module.exports = (app) ->
   console.log 'Initializing Routers...'
 
-  Home = new App.Controllers.Home(App)
-  Socket = new App.Controllers.Socket(App)
+  app.Router = class Router
+    routeTo: (controller, action) -> controller[action].bind(controller)
 
-  App.get('/', Home.index.bind(Home))
+  app.Routers.Home   = require('./home_router.coffee')(app)
+  app.Routers.Auth   = require('./auth_router.coffee')(app)
+  app.Routers.Socket = require('./socket_router.coffee')(app)
 
-  App.socket(Socket.connect.bind(Socket))
+  (new Router()).initialize() for name, Router of app.Routers
 
-  App
+  app

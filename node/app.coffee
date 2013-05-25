@@ -1,50 +1,42 @@
 Q   = require('q')
-App = require('express')()
+app = require('express')()
 
-App.environment = process.env.NODE_ENV or 'development'
+app.environment = process.env.NODE_ENV or 'development'
 
-App.express     = require('express')
-App.roots       = require('roots-express')
-App.assets      = require('connect-assets')
+app.Routers     = require('./routers')
+app.Models      = require('./models')
+app.Controllers = require('./controllers')
 
-App.database    = require('./lib/database.coffee')
-App.server      = require('./lib/server.coffee')
+app.config      = require('./config.json')
 
-App.Routers     = require('./routers')
-App.Models      = require('./models')
-App.Controllers = require('./controllers')
+app.database    = new (require('./lib/database'))(app)
+app.server      = new (require('./lib/server'))(app)
 
-App.config      = require('./config.json')
+appStart = (app) ->
+  console.log 'Node app Started'
+  app
 
-App.socket = (handler) ->
-  if handler then App._socket = handler else App._socket
-
-App.set(name, value) for name, value of App.config
-
-Q(App)
-  .then(AppStart)
-  .then(App.database)
-  .then(App.Models)
-  .then(App.Controllers)
-  .then(App.Routers)
-  .then(App.server)
-  .then(receiveSignal)
-  .then(AppStop, AppCrash)
-
-AppStart = (App) ->
-  console.log 'Node App Started'
-  App
-
-AppStop = (App) ->
-  console.log 'Node App Stopped'
+appStop = (app) ->
+  console.log 'Node app Stopped'
   process.exit 0
 
-AppCrash = (error) ->
-  console.log 'Node App Crashed', error
+appCrash = (error) ->
+  console.log 'Node app Crashed', error
   process.exit 1
 
-receiveSignal = (App) ->
+receiveSignal = (app) ->
   deferred = Q.defer()
-  process.on 'SIGINT', deferred.resolve.bind(deferred, App)
-  process.on 'SIGTERM', deferred.resolve.bind(deferred, App)
+  process.on 'SIGINT', deferred.resolve.bind(deferred, app)
+  process.on 'SIGTERM', deferred.resolve.bind(deferred, app)
   deferred.promise
+
+Q(app)
+  .then(appStart)
+  .then(->app.database.initialize())
+  .then(->app.server.initialize())
+  .then(app.Models)
+  .then(app.Controllers)
+  .then(app.Routers)
+  .then(->app.server.listen())
+  .then(receiveSignal)
+  .then(appStop, appCrash)
