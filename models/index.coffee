@@ -80,6 +80,12 @@ module.exports = (app) ->
       base[object]        = base[object] or {}
       base[object][array] = base[object][array] or []
 
+    @find: (query, fields, options) ->
+      database.find(@collection, query, fields, options)
+
+    @findOne: (query, fields, options) ->
+      database.findOne(query, fields, options)
+
     @default: (selector, value) ->
       initCache(@, '_defaults', selector)
       @_defaults[selector].push(value)
@@ -91,6 +97,9 @@ module.exports = (app) ->
     @hook: (action, hook) ->
       initCache(@, '_hooks', action)
       @_hooks[action].push(hook)
+
+    load: ->
+      @constructor.collection
 
     save: ->
       defaults          = @constructor._defaults or []
@@ -108,6 +117,5 @@ module.exports = (app) ->
 
   app.Models.Socket = require('./socket_model.coffee')(app)
   app.Models.User   = require('./user_model.coffee')(app)
-
 
   app

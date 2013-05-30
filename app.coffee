@@ -1,42 +1,43 @@
-Q   = require('q')
-app = require('express')()
+class App
+  $     = require('when')
+  defer = require('deferrable')($)
 
-app.environment = process.env.NODE_ENV or 'development'
+  environment: process.env.NODE_ENV or 'development'
 
-app.Routers     = require('./routers')
-app.Models      = require('./models')
-app.Controllers = require('./controllers')
+  constructor: ->
+    @config      = require('./config.json')
 
-app.config      = require('./config.json')
+    @Models      = require('./models')
+    @Controllers = require('./controllers')
+    @Routers     = require('./routers')
 
-app.database    = new (require('./lib/database'))(app)
-app.server      = new (require('./lib/server'))(app)
+    @database    = new (require('./lib/database')(@))()
+    @server      = new (require('./lib/server')(@))()
 
-appStart = (app) ->
-  console.log 'Node app Started'
-  app
+  run: ->
+    console.log 'Started'
 
-appStop = (app) ->
-  console.log 'Node app Stopped'
-  process.exit 0
+    $(@)
+    .then(@Models)
+    .then(@Controllers)
+    .then(@Routers)
+    .then(=>@database.open())
+    .then(=>@server.listen())
+    .then(receiveSignal)
+    .then(appStopped, appCrashed)
 
-appCrash = (error) ->
-  console.log 'Node app Crashed', error
-  process.exit 1
+  receiveSignal = ->
+    deferred = $.defer()
+    process.on 'SIGINT', deferred.resolve
+    process.on 'SIGTERM', deferred.resolve
+    deferred.promise
 
-receiveSignal = (app) ->
-  deferred = Q.defer()
-  process.on 'SIGINT', deferred.resolve.bind(deferred, app)
-  process.on 'SIGTERM', deferred.resolve.bind(deferred, app)
-  deferred.promise
+  appStopped = ->
+    console.log 'Stopped'
+    process.exit 0
 
-Q(app)
-  .then(appStart)
-  .then(->app.database.initialize())
-  .then(->app.server.initialize())
-  .then(app.Models)
-  .then(app.Controllers)
-  .then(app.Routers)
-  .then(->app.server.listen())
-  .then(receiveSignal)
-  .then(appStop, appCrash)
+  appCrashed = (error) ->
+    console.log 'Crashed', error
+    process.exit 1
+
+(new App()).run()

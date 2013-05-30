@@ -1,14 +1,25 @@
-module.exports = class Database
-  constructor: (app) ->
-    @app  = app
-    @name = app.config.database.name
-    @host = app.config.database.host
-    @port = app.config.database.port
+module.exports = (app) ->
+  class Database
+    $     = require('when')
+    defer = require('deferrable')($)
+    mongo = require('mongodb')
 
-  initialize: (app) ->
-    Q         = require('q')
-    @mongoose = require('mongoose-q')(require('mongoose'), prefix: '_')
+    constructor: ->
+      @name = app.config.database?.name
+      @port = app.config.database?.port or 27017
+      @host = app.config.database?.host or 'localhost'
 
-    @mongoose.connect "mongodb://#{@host}:#{@port}/#{@name}"
+    open: (options = {}) ->
+      @server    = mongo.Server(
+        options.host or @host, options.port or @port)
+      @connector = mongo.Db(options.name or @name, @server)
 
-    Q.ninvoke(@mongoose.connection, 'once', 'open').then => @app
+      @connector.defer('open').then (database) =>
+        @store = @database = database
+        @
+
+    find: (collection, query, field, options) ->
+      $(@collections[collection] or @database.defer('collection', collection)).then (c) ->
+        @collections[collection] = c
+
+        c.defer('find', query, field)

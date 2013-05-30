@@ -1,10 +1,9 @@
 module.exports = (app) ->
   class AuthRouter extends app.Router
-    initialize: ->
-      Auth = new app.Controllers.Auth(app)
+    Auth = new app.Controllers.Auth(app)
 
-      app.get('/auth/twitter', @routeTo(Auth, 'twitterAuth'))
-      app.get('/auth/twitter/callback', @routeTo(Auth, 'twitterCallback'))
+    @get '/auth/twitter', @routeTo(Auth, 'twitterAuth')
+    @get '/auth/twitter/callback', @routeTo(Auth, 'twitterCallback')
 
-      app.get('/auth/facebook', @routeTo(Auth, 'facebookAuth'))
-      app.get('/auth/facebook/callback', @routeTo(Auth, 'facebookCallback'))
+    @get '/auth/facebook', @routeTo(Auth, 'facebookAuth')
+    @get '/auth/facebook/callback', @routeTo(Auth, 'facebookCallback')
