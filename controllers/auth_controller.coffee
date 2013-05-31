@@ -2,6 +2,8 @@ module.exports = (app) ->
   class AuthController extends app.Controller
     passport = require('passport')
 
+    User     = app.Models.User
+
     constructor: ->
       super
       passport.serializeUser (user, done) -> done(null, user)
@@ -29,8 +31,7 @@ module.exports = (app) ->
         consumerSecret: app.config.twitter.consumerSecret
         callbackURL: "http://127.0.0.1:3000/auth/twitter/callback"
       }, (token, tokenSecret, profile, done) ->
-        console.log profile
-        done null, profile
+        done null, User.findOrCreateFromTwitterProfile(profile)
       ))
 
     initializeFacebookAuth = ->
@@ -41,7 +42,6 @@ module.exports = (app) ->
         clientSecret: app.config.facebook.appSecret
         callbackURL: "http://127.0.0.1:3000/auth/facebook/callback"
       }, (accessToken, refreshToken, profile, done) ->
-        console.log profile
-        done null, profile
+        done null, User.findOrCreateFromFacebookProfile(profile)
       ))
 

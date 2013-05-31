@@ -40,25 +40,29 @@ module.exports = (app) ->
         @app.use(@app.router)
 
     listen: ->
+
+
       http       = require('http')
       io         = require('socket.io')
 
-      roots.watch(@server = http.createServer(@app))
+      @server = http.createServer(@app)
+
+      roots.watch(@server)
 
       @server.defer('listen', @port).then =>
         console.log "   info  - http server started on #{@port}"
-        listener = io.listen(@server)
-        listener.configure ->
-          listener.set('log level', 1)
-          listener.set('transports',[
-            'websocket'
-            'xhr-polling'
-            'jsonp-polling'
-          ])
-          listener.enable('browser client minification')
-          listener.enable('browser client etag')
-          listener.enable('browser client cache')
-        listener.sockets.on('connection', @_socket) if @_socket
+        # listener = io.listen(@server)
+        # listener.configure ->
+        #   listener.set('log level', 1)
+        #   listener.set('transports',[
+        #     'websocket'
+        #     'xhr-polling'
+        #     'jsonp-polling'
+        #   ])
+        #   listener.enable('browser client minification')
+        #   listener.enable('browser client etag')
+        #   listener.enable('browser client cache')
+        # listener.sockets.on('connection', @_socket) if @_socket
         @
 
     expandPath = (path) ->

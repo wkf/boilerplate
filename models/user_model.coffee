@@ -2,8 +2,10 @@ module.exports = (app) ->
   class UserModel extends app.Model
     @collection: 'users'
     @schema:
-      id: 'ObjectId'
-      type: 'String'
+      _id:
+        id: 'Number'
+        provider: 'String'
+      provider: 'String'
       handle: 'String'
       name:
         first: 'String'
@@ -12,11 +14,22 @@ module.exports = (app) ->
       createdAt: 'Date'
       updatedAt: 'Date'
 
-    @default 'type', 'twitter'
+    # create unique index!
 
-    @validate 'name.first', (firstName) -> firstName.match /name/
-    @validate 'name.last', (lastName) -> lastName.match /name/
+    # @validate 'name.first', (firstName) -> firstName.match /name/
+    # @validate 'name.last', (lastName) -> lastName.match /name/
 
-    @findOrCreateFromTwitterProfile: (profile) ->
-    @findOrCreateFromFacebookProfile: (profile) ->
+    @findOrCreateFromTwitterProfile: (profile) =>
+      @findOrCreate
+        _id:
+          id: profile.id
+          provider: profile.provider
+        handle: profile.username
+
+    @findOrCreateFromFacebookProfile: (profile) =>
+      @findOrCreate
+        _id:
+          id: profile.id
+          provider: profile.provider
+        handle: profile.username
 

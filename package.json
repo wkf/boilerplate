@@ -8,7 +8,7 @@
   "dependencies": {
     "jade": "latest",
     "stylus": "latest",
-    "coffee-script": "latest",
+    "coffee-script": "~1.6.2",
     "connect-assets": "latest",
     "socket.io": "~0.9.14",
     "passport": "~0.1.17",

@@ -2,6 +2,8 @@ module.exports = (app) ->
   console.log 'Initializing Models...'
 
   app.Model = class Model
+    database = app.database
+
     class TypeError extends Error
     class ValidationError extends Error
 
@@ -84,7 +86,11 @@ module.exports = (app) ->
       database.find(@collection, query, fields, options)
 
     @findOne: (query, fields, options) ->
-      database.findOne(query, fields, options)
+      database.findOne(@collection, query, fields, options)
+
+    @findOrCreate: (query, options) ->
+      console.log 'findOrCreate', query
+      database.findOrCreate(@collection, query, options)
 
     @default: (selector, value) ->
       initCache(@, '_defaults', selector)

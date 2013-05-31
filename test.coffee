@@ -1,0 +1,1 @@
+class GridStream extends require('stream')
